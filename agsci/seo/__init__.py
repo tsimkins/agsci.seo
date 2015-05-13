@@ -7,6 +7,45 @@ seoMessageFactory = MessageFactory('agsci.seo')
 
 allow_module('agsci.seo')
 
+exclude_types = [
+    'Cardinality Constraint',
+    'Content Reference',
+    'FSDCommittee',
+    'FSDCommitteeMembership',
+    'FSDCommitteesFolder',
+    'FSDCourse',
+    'FSDDepartment',
+    'FSDDepartmentalMembership',
+    'FSDFacultyStaffDirectoryTool',
+    'FSDPersonGrouping',
+    'FSDSpecialtiesFolder',
+    'FSDSpecialty',
+    'FSDSpecialtyInformation',
+    'FieldsetEnd',
+    'FieldsetFolder',
+    'FieldsetStart',
+    'FormBooleanField',
+    'FormConfirmationPage',
+    'FormMailerAdapter',
+    'FormMultiSelectionField',
+    'FormRichLabelField',
+    'FormSaveDataAdapter',
+    'FormSelectionField',
+    'FormStringField',
+    'FormTextField',
+    'FormThanksPage',
+    'HomePage',
+    'Interface Constraint',
+    'Inverse Implicator',
+    'Link',
+    'Newsletter',
+    'Relations Library',
+    'Ruleset Collection',
+    'Ruleset',
+    'TalkEvent',
+    'Type Constraint',
+]
+
 def initialize(context):
     pass
 
@@ -18,6 +57,7 @@ def getDisallowedPaths(context):
     portal_catalog = getToolByName(context, 'portal_catalog')
 
     results = [x for x in portal_catalog.searchResults({'exclude_from_robots' : True})]
+    results.extend([x for x in portal_catalog.searchResults({'portal_type' : exclude_types})])
     results.extend([x for x in portal_catalog.searchResults({'portal_type' : 'Event', 'end' : {'query' : now, 'range' : 'max'}})])
     results.extend([x for x in portal_catalog.searchResults({'expires' : {'query' : now, 'range' : 'max'}})])
     

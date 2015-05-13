@@ -1,6 +1,7 @@
 from zope.component import getMultiAdapter
 from plone.app.layout.viewlets.common import ViewletBase
 from DateTime import DateTime
+from agsci.seo import exclude_types
 
 class CanonicalURLViewlet(ViewletBase):
 
@@ -25,26 +26,28 @@ class CanonicalURLViewlet(ViewletBase):
 
 class RobotsMetaViewlet(ViewletBase):
 
-    def update(self):
-
-        self.norobots = False
-        
-        # Explicit Exclude from Robots checked
-        
-        try:
-            if self.context.exclude_from_robots:
-                self.norobots = True
-        except AttributeError:
-            pass
+    @property
+    def norobots(self):
 
         now = DateTime()
+        
+        # Explicit Exclude from Robots checked
+        if getattr(self.context, 'exclude_from_robots', False):
+            return True
+
+        # Type excluded from search engines
+        elif self.context.portal_type in exclude_types:
+            return True
 
         # Event is over
 
-        if self.context.portal_type in ['Event'] and self.context.end() < now:
-            self.norobots = True
+        elif self.context.portal_type in ['Event'] and self.context.end() < now:
+            return True
 
         # Content is expired
 
-        if self.context.expires() < now:
-            self.norobots = True
+        elif self.context.expires() < now:
+            return True
+
+        else:
+            return False
