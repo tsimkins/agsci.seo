@@ -34,7 +34,6 @@ exclude_types = [
     'FormStringField',
     'FormTextField',
     'FormThanksPage',
-    'HomePage',
     'Interface Constraint',
     'Inverse Implicator',
     'Link',
