@@ -7,8 +7,6 @@
     <include package="archetypes.schemaextender" />
     <include package=".browser" />
 
-    <cmf:registerDirectory name="agsci_seo" />
-
     <genericsetup:registerProfile
         name="default"
         title="agsci.seo"

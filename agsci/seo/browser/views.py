@@ -1,3 +1,4 @@
+from Products.Five import BrowserView
 from zope.interface import implements, Interface
 from Products.agCommon.browser.views import FolderView
 from Products.CMFCore.utils import getToolByName
@@ -144,4 +145,25 @@ class SiteMapView(_SiteMapView, FolderView):
                 #'changefreq': 'always', # hourly/daily/weekly/monthly/yearly/never
                 #'prioriy': 0.5, # 0.0 to 1.0
             }
+
+class RobotsTxtView(BrowserView):
+
+    def __call__(self):
+        self.request.response.setHeader('Content-Type', 'text/plain')
+        return self.index()
+
+    def getDisallowedPaths(self):
+        
+        portal_catalog = getToolByName(self.context, 'portal_catalog')
+    
+        results = [x for x in portal_catalog.searchResults({'exclude_from_robots' : True})]
+        
+        portal_url = self.context.portal_url()
+        
+        disallow = []
+        
+        for r in results:
+            disallow.append(r.getURL().replace(portal_url, '') )
+        
+        return sorted(list(set(disallow)))
 

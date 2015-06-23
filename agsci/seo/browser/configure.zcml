@@ -13,7 +13,7 @@
         class=".viewlets.CanonicalURLViewlet"
         permission="zope2.View"
         template="templates/canonical_url.pt"
-        layer=".interfaces.IThemeSpecific"
+        layer="Products.agCommon.browser.interfaces.IThemeSpecific"
         for="agsci.seo.interfaces.ICanonicalURLExtender"
         />
 
@@ -24,7 +24,7 @@
         class=".viewlets.RobotsMetaViewlet"
         permission="zope2.View"
         template="templates/robots_meta.pt"
-        layer=".interfaces.IThemeSpecific"
+        layer="Products.agCommon.browser.interfaces.IThemeSpecific"
         />
 
     <!-- Render the Canonical Redirect -->
@@ -35,7 +35,7 @@
         class=".viewlets.CanonicalURLViewlet"
         permission="zope2.View"
         template="templates/canonical_redirect.pt"
-        layer=".interfaces.IThemeSpecific"
+        layer="Products.agCommon.browser.interfaces.IThemeSpecific"
         />
 
     <!-- Canonical Redirector View -->
@@ -44,7 +44,7 @@
         for="*"
         name="canonical_redirect"
         class=".views.CanonicalRedirectView"
-        layer=".interfaces.IThemeSpecific"
+        layer="Products.agCommon.browser.interfaces.IThemeSpecific"
         permission="zope2.View"
     />
 
@@ -54,9 +54,19 @@
         name="sitemap.xml.gz"
         for="plone.app.layout.navigation.interfaces.INavigationRoot"
         class=".views.SiteMapView"
-        permission="zope2.Public"
-        layer=".interfaces.IThemeSpecific"
+        permission="zope2.View"
+        layer="Products.agCommon.browser.interfaces.IThemeSpecific"
     />
 
+    <!-- robots.txt -->
+
+    <browser:page
+        name="robots.txt"
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".views.RobotsTxtView"
+        permission="zope2.View"
+        layer="Products.agCommon.browser.interfaces.IThemeSpecific"
+        template="templates/robots_txt.pt"
+    />
 
 </configure>
