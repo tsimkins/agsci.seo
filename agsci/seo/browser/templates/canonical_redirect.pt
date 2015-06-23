@@ -1,8 +1,9 @@
 <dl class="portalMessage"
-    tal:define="canonical_url view/canonical_url|nothing"
-    tal:condition="canonical_url">
+    tal:define="canonical_url view/canonical_url|nothing;
+                isAnon view/anonymous|nothing"
+    tal:condition="view/show_message|nothing">
     <dt i18n:translate="">Info</dt>
     <dd>
-        This <span tal:content="context/portal_type|nothing" /> is redirected to <a tal:attributes="href canonical_url" tal:content="canonical_url" />.
+        The canonical URL for this <span tal:content="context/portal_type|nothing" /> is <a tal:attributes="href canonical_url" tal:content="canonical_url" />.
     </dd>
 </dl>

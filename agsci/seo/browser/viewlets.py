@@ -5,23 +5,28 @@ from agsci.seo import exclude_types
 
 class CanonicalURLViewlet(ViewletBase):
 
-    def update(self):
+    def show_message(self):
+        return (self.canonical_url and not self.anonymous)
 
-        self.canonical_url = ''
+    @property
+    def anonymous(self):
+        return self.portal_state.anonymous()
+
+    @property
+    def canonical_url(self):
 
         # Look up canonical URL refs
         refs = self.context.getReferences(relationship = 'IsCanonicalURLFor')
 
         if refs:
             # Just in case it has multiples
-            self.canonical_url = refs[0].absolute_url()
+            return refs[0].absolute_url()
         else:
             # Look for the string field
-            try:
-                if self.context.canonical_url_text:
-                    self.canonical_url = self.context.canonical_url_text
-            except AttributeError:
-                pass
+            return getattr(self.context, 'canonical_url_text', '')
+
+    
+
 
 
 class RobotsMetaViewlet(ViewletBase):
