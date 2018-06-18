@@ -1,12 +1,15 @@
-from Products.Five import BrowserView
-from zope.interface import implements, Interface
-from Products.agCommon.browser.views import FolderView
+from BTrees.OOBTree import OOBTree
+from DateTime import DateTime
 from Products.CMFCore.utils import getToolByName
+from Products.CMFPlone.interfaces import IPloneSiteRoot
+from Products.Five import BrowserView
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from plone.app.layout.sitemap.sitemap import SiteMapView as _SiteMapView
-from BTrees.OOBTree import OOBTree
-from Products.CMFPlone.interfaces import IPloneSiteRoot
-from DateTime import DateTime
+from plone.registry.interfaces import IRegistry
+from zope.component import getUtility
+from zope.interface import implements, Interface
+
+from Products.agCommon.browser.views import FolderView
 from agsci.seo import exclude_types
 
 class ICanonicalRedirectView(Interface):
@@ -14,20 +17,20 @@ class ICanonicalRedirectView(Interface):
 
 
 class CanonicalRedirectView(FolderView):
+
     """
     Redirects entity to the corresponding content based on canonical URL
     """
 
     implements(ICanonicalRedirectView)
 
-
     def __call__(self):
         context = self.context
         mtool = getToolByName(context, 'portal_membership')
         can_edit = mtool.checkPermission('Modify portal content', context)
-        
+
         redirectURL = None
-        
+
         refs = self.context.getReferences(relationship = 'IsCanonicalURLFor')
 
         if refs:
@@ -36,21 +39,20 @@ class CanonicalRedirectView(FolderView):
 
         elif hasattr(context, 'canonical_url_text') and getattr(context, 'canonical_url_text'):
             redirectURL = context.canonical_url_text
-        
+
         if redirectURL and not can_edit:
             # Send to the configured website
             return context.REQUEST.RESPONSE.redirect(redirectURL)
         else:
             # Render the first layout listed
             layout = 'base_view'
-            
+
             for (l,t) in context.getAvailableLayouts():
                 if l != 'canonical_redirect':
                     layout = l
                     break
-                                
-            return eval("context.%s()" % layout)
 
+            return eval("context.%s()" % layout)
 
 
 class SiteMapView(_SiteMapView, FolderView):
@@ -66,7 +68,7 @@ class SiteMapView(_SiteMapView, FolderView):
         utils = getToolByName(self.context, 'plone_utils')
 
         query['portal_type'] = list(set(utils.getUserFriendlyTypes()) - set(exclude_types))
-        
+
         ptool = getToolByName(self, 'portal_properties')
 
         siteProperties = getattr(ptool, 'site_properties')
@@ -148,22 +150,42 @@ class SiteMapView(_SiteMapView, FolderView):
 
 class RobotsTxtView(BrowserView):
 
+    registry_key = "agsci.seo.robots"
+
+    @property
+    def registry(self):
+        return getUtility(IRegistry)
+
+    def getRegistryDisallowedPaths(self):
+
+        value = self.registry.get(self.registry_key)
+
+        if value and isinstance(value, (list, tuple)):
+            return list(value)
+
+        return []
+
     def __call__(self):
         self.request.response.setHeader('Content-Type', 'text/plain')
         return self.index()
 
     def getDisallowedPaths(self):
-        
-        portal_catalog = getToolByName(self.context, 'portal_catalog')
-    
-        results = [x for x in portal_catalog.searchResults({'exclude_from_robots' : True})]
-        
-        portal_url = self.context.portal_url()
-        
+
+        # Initialize list
         disallow = []
         
+        # Add the values we have hardcoded in the registry
+        disallow.extend(self.getRegistryDisallowedPaths())
+        
+        # Query the catalog for items with 'exclude_from_robots' set to True
+        portal_catalog = getToolByName(self.context, 'portal_catalog')
+
+        results = [x for x in portal_catalog.searchResults({'exclude_from_robots' : True})]
+
+        portal_url = self.context.portal_url()
+
         for r in results:
             disallow.append(r.getURL().replace(portal_url, '') )
-        
+
         return sorted(list(set(disallow)))
 
